@@ -19,13 +19,13 @@ namespace UserLogging.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthResponse>> Register (UserDto request)
+        public async Task<AuthResponse> Register (UserDto request)
         {            
             return await _userService.Register(request);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AuthResponse>> Login (UserDto request)
+        public async Task<AuthResponse> Login (UserDto request)
         {
             return await _userService.Login(request);
         }

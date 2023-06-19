@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using UserLogging.DbData;
+using UserLogging.Models.PossibleActions;
 using UserLogging.Models.User;
 
 namespace UserLogging.Services.UserService
@@ -13,10 +14,13 @@ namespace UserLogging.Services.UserService
     {
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
-        public UserService(DataContext context, IConfiguration configuration)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public UserService(DataContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<AuthResponse> Login(UserDto loginDto)
@@ -54,6 +58,23 @@ namespace UserLogging.Services.UserService
             return CreateResponseWithJwtToken(user);
         }
 
+        public async Task<PossibleAction[]> GetUserActions()
+        {
+            int id = int.Parse(GetUserIdFromClaims());
+            return await _context.UserActions.Where(x => x.UserId == id).ToArrayAsync();  
+        }
+
+        private string GetUserIdFromClaims()
+        {
+            string userId = string.Empty;
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            }
+
+            return userId;
+        }
+
         private async Task<bool> AlreadyExist (string username)
         {
             return (await _context.Users.FirstOrDefaultAsync(x => x.Username == username)) != null;
@@ -80,6 +101,6 @@ namespace UserLogging.Services.UserService
             var jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
 
             return new AuthResponse() { StatusCode = 200, JwtToken = jwtToken };
-        }
+        }        
     }
 }

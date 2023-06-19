@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using UserLogging.Models.PossibleActions;
 using UserLogging.Models.User;
 
 namespace UserLogging.DbData
@@ -11,5 +12,6 @@ namespace UserLogging.DbData
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<PossibleAction> UserActions { get; set; }
     }
 }
